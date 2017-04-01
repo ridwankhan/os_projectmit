@@ -5,15 +5,7 @@
 #include <pthread.h>
 #include <math.h>
 
-/*
-struct myStruct{
 
-	
-	int number;
-	int myArray[];
-
-	};
-*/
 void sieve(int myArray[]){
 	
 	int number = myArray[0];
@@ -101,7 +93,7 @@ int main(int argc, char *argv[]){
 	pthread_attr_init(&attr2);
 	
 	pthread_create(&tid2, &attr2, (void*)reversePrime, &myArray);
-	 pthread_join(tid,NULL);
+	 pthread_join(tid2,NULL);
 	
 	
 	
