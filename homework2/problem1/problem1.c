@@ -47,9 +47,9 @@ void reversePrime(int myArray[]){
 			n = i;
 			reverse = 0;
 			while (n != 0){
-			reverse = reverse*10;
-			reverse = reverse + n%10;
-			n = n/10;
+				reverse = reverse*10;
+				reverse = reverse + n%10;
+				n = n/10;
 			}
 			if ((reverse <= number) && myArray[reverse])
 			{
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]){
 	pthread_attr_init(&attr2);
 	
 	pthread_create(&tid2, &attr2, (void*)reversePrime, &myArray);
-	 pthread_join(tid2,NULL);
+	pthread_join(tid2,NULL);
 	
 	
 	
