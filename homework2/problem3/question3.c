@@ -6,52 +6,100 @@ Use shared variables and semaphores for your solution. Consider making any chang
 the code segment that follows:
 */
 
-#include <smeap
-...
+#include <semaphore.h>
+#include <pthread.h>
+#include <stdio.h>
+//comment for comment sake
 
-int k =10;
+int shared;
+sem_t roomAvailable;
+int k =1;
+
 void make_transaction()
 {
 	// makes the transaction
-	fprintf("Transaction Made! \n");
+	printf("customer %u Transaction Made! \n",(int) pthread_self());
+	sleep(2);
 
 }
 
 void take_a_walk()
 {
 	// makes the customer come back and try again 
-	fprintf("Customer took a walk! \n");
+	printf("Customer took %u a walk! \n",(int) pthread_self());
+	sleep(2);
 }
 void return_home()
 {
 	//removes the customer
+	printf("Customer %u Removed! \n",(int) pthread_self());
+	sem_post(&roomAvailable);
+	
 }
 void bank_client()
 {
+
 	while(1)
 	{
-		...
-		if (...) 
-		{/* if seats avaliable*/
-			// take a seat 
-			// make a queue
-			...
-		make_transaction();
-		...
-		break;
-		}
-		else{
 		
-			...
-			take_a_walk();
+		printf("Hi I am thread %u \n", (int) pthread_self());
+
+		int currentvalue;
+
+
+		sem_getvalue(&roomAvailable, &currentvalue);
+
+		printf("current value %d\n",currentvalue);
+
+
+		if(currentvalue != 0)
+		{
+			sem_wait(&roomAvailable); // blocks if no room is available
+			make_transaction();
+			break;
+
 		}
+		
+		else
+		{
+			take_a_walk();
+
+		}
+
 	}
+
 	return_home();
 }
 
 int main(int argc, char **argv)
-{
-	queue waiting;	
-	void bank_client()
+{	
+	sem_init(&roomAvailable,0,k);
+
+
+	int NUM_THREADS = 2; // Create 15 customers
+
+	pthread_t threads[NUM_THREADS];
+	int rc;
+	void *status;
+
+
+	for(int i=0; i<NUM_THREADS; i++)
+
+	{
+
+		rc = pthread_create(&threads[i], NULL, (void *)bank_client, NULL);
+		
+	}
+
+	
+	
+	for(int j =0; j<NUM_THREADS; j++)
+	{
+		int rc = pthread_join(threads[j], &status);
+		
+	}
+	
+
+	return 0;
 
 }
