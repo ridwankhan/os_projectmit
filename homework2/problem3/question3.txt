@@ -23,4 +23,23 @@ iii)Provide an implementation of the semaphore that avoids the busy wait.
 
 To avoid busy wait, a process that has to wait on a semaphore should be blocked and put into a queue. When the semaphore allows new processes to run, they will be taken out of the queue in a first in first out order. This prevents busy waiting since the spot is opened up to a new process.
 
-In which places is now the waiting restricted?
+
+void wait(semaphore S){
+  S.count--;
+  if (S.count<0) {
+	add this process to S.queue
+ 	block this process
+  	}
+}
+
+signal(S){
+  S.count++;
+  if (S.count<=0) {
+    move one process P from S.queue
+    to ready list
+  }
+
+In which places is now the waiting restricted? 
+
+Waiting is now restricted whenever a process needs to wait for a semaphore. It will now go into a queue block where it will wait its turn until it reaches the front of the line and has the semaphore signal for another process. 
+
