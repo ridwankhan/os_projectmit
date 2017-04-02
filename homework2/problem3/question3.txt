@@ -5,17 +5,17 @@ Semaphore is a tag that indicates the status of a common scarce resource. A thre
 
 What type are the synchronization problems that a semaphore may resolve but the simple lock cannot?
 
-A few examples of synchronizaion problems that can be solved using semaphores include the following. One example would be that of a producer-consumer. Lets say there is one process that is creating the information that will be used by another process.In this case if you were to use a mutex each time the producer produces one item it would have to wait for the consumer to consume the item before producing the next one. However, theres no need for a perfect lock-step because producer should be able to get ahead of the consumer. 
-In this case if we use a semaphore, we can cover both mutual exclusion as well as the aspect of conditon synchronization. Meaning only one of them,either the consumer and the producer should access the information at once (mututal exclusion) however producer can keep producing till buffer is full (condition synchronization) and the consumer has to wait till the buffer has some information (coniditon synchroization). 
+A few examples of synchronization problems that can be solved using semaphores include the following. One example would be that of a producer-consumer. Lets say there is one process that is creating the information that will be used by another process.In this case if you were to use a mutex each time the producer produces one item it would have to wait for the consumer to consume the item before producing the next one. However, theres no need for a perfect lock-step because producer should be able to get ahead of the consumer. 
+In this case if we use a semaphore, we can cover both mutual exclusion as well as the aspect of condition synchronization. Meaning only one of them, either the consumer and the producer should access the information at once (mutual exclusion) however producer can keep producing till buffer is full (condition synchronization) and the consumer has to wait till the buffer has some information (condition synchronization). 
 
-Another example of using semaphores over mutexs would be the case where you have a shared database with multiple readers and writers. In this case using only a mutex would prevent readers/writers from accessing same information at the same time. However if you use semaphores you would be able to make sure that there are no active writers or readers when someone is writing (condtion synchronization) and also that no one is reading when there are active writers (condition synchronization). 
+Another example of using semaphores over mutexes would be the case where you have a shared database with multiple readers and writers. In this case using only a mutex would prevent readers/writers from accessing same information at the same time. However if you use semaphores you would be able to make sure that there are no active writers or readers when someone is writing (condition synchronization) and also that no one is reading when there are active writers (condition synchronization). 
 
 Overall the main advantage to using semaphores is that is also gives condition synchronization along with mutual exclusion. 
 
 
 ii) Provide the definition of a semaphore by Dijkstra. The implementation based on this definition leads to the issue of “busy waiting”. What is this problem and why is it undesirable?
 
-In computer science, a semaphore is a variable or abstract data type used to control access to a common resource by multiple processes in a concurrent system such as a multiprogramming operating system.
+In computer science, a semaphore is a variable or abstract data type used to control access to a common resource by multiple processes in a concurrent system such as a multiprogramming operating system. 
 
 Busy waiting means a process simply spins (does nothing but continue to test its entry condition) while it is waiting to enter its critical section. This continues to use (waste) CPU cycles, which is inefficient. Additionally, if a low priority process is in its critical section, and a high priority process goes into busy waiting, it may never get to its critical section.
 
