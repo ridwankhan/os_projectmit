@@ -13,13 +13,16 @@ the code segment that follows:
 
 int shared;
 sem_t roomAvailable;
-int k =1;
+sem_t serviceAvailable;
+int k =3;
 
 void make_transaction()
 {
 	// makes the transaction
-	printf("customer %u Transaction Made! \n",(int) pthread_self());
+	
 	sleep(2);
+	printf("customer %u Transaction Made! \n",(int) pthread_self());
+	sem_post(&serviceAvailable);
 
 }
 
@@ -55,6 +58,9 @@ void bank_client()
 		if(currentvalue != 0)
 		{
 			sem_wait(&roomAvailable); // blocks if no room is available
+
+			sem_wait(&serviceAvailable);
+			printf("Thread   %u making transaction \n", (int) pthread_self());
 			make_transaction();
 			break;
 
@@ -74,9 +80,10 @@ void bank_client()
 int main(int argc, char **argv)
 {	
 	sem_init(&roomAvailable,0,k);
+	sem_init(&serviceAvailable,0,1);
 
 
-	int NUM_THREADS = 2; // Create 15 customers
+	int NUM_THREADS = 5; // Create 15 customers
 
 	pthread_t threads[NUM_THREADS];
 	int rc;
