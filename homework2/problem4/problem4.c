@@ -23,37 +23,39 @@ int NUM_PARENT = 3;
 
 void teacher_enter()
 {
-	printf("Teacher Entered \n");
-	sem_wait(&numberOfTeacher);
+	printf("Teacher %u Entered \n", (int) pthread_self());
+	//sem_wait(&numberOfTeacher);
 }
 void child_enter(){
-	printf("Child Entered \n");
+	printf("Child %u Entered \n", (int) pthread_self());
 	sem_wait(&numberOfChildren);
 }
 void parent_enter(){
-	printf("Parent Entered \n");
+	printf("Parent %u Entered \n", (int) pthread_self());
 	sem_wait(&numberOfParent);
 }
 void teach(){
-	printf("Teacher is teaching \n");
-	sleep(1);
+	printf("Teacher %u is teaching \n",(int) pthread_self());
+	sleep(2);
 }
 void learn(){
-	printf("Child is learning \n");
-	sleep(1);
+	printf("Child %u is learning \n", (int) pthread_self());
+	sleep(2);
 
 }
 void verify_compliance(){
-	printf("Parent checking compliance \n");
+	printf("Parent %u checking compliance \n", (int) pthread_self());
 
 	sem_getvalue(&numberOfChildren, &currentChildrenValue);
 	sem_getvalue(&numberOfTeacher, &currentTeacherValue);
 
 	currentTeachers=NUM_TEACHER-currentTeacherValue;
 	currentChildren=NUM_CHILD-currentChildrenValue;
+
 	printf("number of children: %d \n", currentChildren);
 	printf("number of teachers: %d \n", currentTeachers);
-	if(ceil((double)(currentChildren / R)) <= currentTeachers)
+
+	if(ceil((double)currentChildren / (double)R) <= currentTeachers)
 	{
 		printf("Regulation is complied with\n");
 	}
@@ -67,86 +69,117 @@ void verify_compliance(){
 bool teacher_exit()
 {
 	
-	printf("Teacher trying to leave \n");
+	printf("Teacher %u trying to leave \n", (int) pthread_self());
+
 	sem_getvalue(&numberOfChildren, &currentChildrenValue);
 	sem_getvalue(&numberOfTeacher, &currentTeacherValue);
+
 	currentTeachers=NUM_TEACHER-currentTeacherValue;
 	currentChildren=NUM_CHILD-currentChildrenValue;
+
 	printf("number of children: %d \n", currentChildren);
 	printf("number of teachers: %d \n", currentTeachers);
-	if(ceil((double)(currentChildren / R)) < currentTeachers)
+
+	if(ceil((double)currentChildren / (double)R) < currentTeachers)
 	{
-		printf("Teacher is allowed to leave\n");
+		printf("Teacher %u is allowed to leave\n", (int) pthread_self());
 		sem_post(&numberOfTeacher);
 		return true;
 	}
 
 	else
 	{
-		printf("Teacher goes back to classroom \n");
+		printf("Teacher %u goes back to classroom \n", (int) pthread_self());
 		return false;
 	}
 
 }
 void child_exit(){
-	printf("Child is leaving \n");
+	printf("Child %u is leaving \n",(int) pthread_self());
 	sem_post(&numberOfChildren);
 }
 void parent_exit(){
-	printf("parent is exiting\n");
+	printf("parent %u is exiting\n", (int) pthread_self());
 	sem_post(&numberOfParent);
 }
 
 
 void Teacher() {
+	printf("teacher %u created\n", (int) pthread_self());
+	sem_wait(&numberOfTeacher);
 	for (;;)
 	{
 		sem_getvalue(&numberOfChildren, &currentChildrenValue);
 		sem_getvalue(&numberOfTeacher, &currentTeacherValue);
+
 		currentTeachers=NUM_TEACHER-currentTeacherValue;
 		currentChildren=NUM_CHILD-currentChildrenValue;
-		printf("number of children: %d \n", currentChildren);
-		printf("number of teachers: %d \n", currentTeachers);
+
+
 		teacher_enter();
+		sem_getvalue(&numberOfChildren, &currentChildrenValue);
+		sem_getvalue(&numberOfTeacher, &currentTeacherValue);
+
+		currentTeachers=NUM_TEACHER-currentTeacherValue;
+		currentChildren=NUM_CHILD-currentChildrenValue;
+		
+		printf("number of children from teacher func: %d \n", currentChildren);
+		printf("number of teachers from teacher func: %d \n", currentTeachers);
+
 		//critical section
 		teach();
 
 		if (teacher_exit())
-		{	printf("teacher goes home\n");
+		{	printf("teacher %u goes home\n", (int) pthread_self());
 			break;
 		}
+
 		else 
 			continue;
 	}
 }
 
 void Child(){
+printf("child %u created\n", (int) pthread_self());
 	for (;;)
 	{
 		sem_getvalue(&numberOfChildren, &currentChildrenValue);
 		sem_getvalue(&numberOfTeacher, &currentTeacherValue);
 
+		currentTeachers=NUM_TEACHER-currentTeacherValue;
+		currentChildren=NUM_CHILD-currentChildrenValue;
+		//printf("before entering %d\n",currentChildren );
+
+
 		child_enter();
+		sem_getvalue(&numberOfChildren, &currentChildrenValue);
+		sem_getvalue(&numberOfTeacher, &currentTeacherValue);
+
+		currentTeachers=NUM_TEACHER-currentTeacherValue;
+		currentChildren=NUM_CHILD-currentChildrenValue;
+		printf("number of children from children func: %d \n", currentChildren);
+		printf("number of teachers from children func: %d \n", currentTeachers);
 		//critical section
 		learn();
 		child_exit();
-		printf("child goes home\n");
+		printf("child %u goes home\n", (int) pthread_self());
 		break;
 	}
 }
 
 void Parent(){
-
+printf("parent %u created\n", (int) pthread_self());
 	for (;;)
 	{
 		sem_getvalue(&numberOfChildren, &currentChildrenValue);
 		sem_getvalue(&numberOfTeacher, &currentTeacherValue);
 		sem_getvalue(&numberOfParent, &currentParentValue);
+
 		parent_enter();
 		//critical seciton
 		verify_compliance();
 		parent_exit();
-		printf("parent goes home\n");
+		printf("parent %u goes home\n", (int) pthread_self());
 		break;
 	}
 }
@@ -163,23 +196,24 @@ int main(int argc, char *argv[]){
 	sem_init(&numberOfChildren,0,NUM_CHILD);
 	sem_init(&numberOfParent,0,NUM_PARENT);
 
+	for (int i = 0; i < NUM_TEACHER; ++i)
+	{
+		pthread_create(&teacherThreads[i], NULL, (void *)Teacher, NULL);
+		
+	}
+sleep(1);
 	for (int i = 0; i < NUM_CHILD; ++i)
 	{
 		
 		pthread_create(&childThreads[i], NULL, (void *)Child, NULL);
-		printf("child created\n");
+		
 	}
-	
-	for (int i = 0; i < NUM_TEACHER; ++i)
-	{
-		pthread_create(&teacherThreads[i], NULL, (void *)Teacher, NULL);
-		printf("teacher created\n");
-	}
-
+		
+sleep(1);
 	for (int i = 0; i < NUM_PARENT; ++i)
 	{
 		pthread_create(&parentThreads[i], NULL, (void *)Parent, NULL);
-		printf("parent created\n");
+		
 	}
 
 		
