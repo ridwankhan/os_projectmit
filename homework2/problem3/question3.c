@@ -9,7 +9,8 @@ the code segment that follows:
 #include <semaphore.h>
 #include <pthread.h>
 #include <stdio.h>
-//comment for comment sake
+#include <unistd.h>
+
 
 int shared;
 sem_t roomAvailable;
@@ -21,7 +22,7 @@ void make_transaction()
 	// makes the transaction
 	
 	sleep(2);
-	printf("customer %u Transaction Made! \n",(int) pthread_self());
+	printf("Customer %u Transaction Made! \n",(int) pthread_self());
 	sem_post(&serviceAvailable);
 
 }
@@ -29,7 +30,7 @@ void make_transaction()
 void take_a_walk()
 {
 	// makes the customer come back and try again 
-	printf("Customer took %u a walk! \n",(int) pthread_self());
+	printf("Customer %u took a walk! \n",(int) pthread_self());
 	sleep(2);
 }
 void return_home()
@@ -52,7 +53,7 @@ void bank_client()
 
 		sem_getvalue(&roomAvailable, &currentvalue);
 
-		printf("current value %d\n",currentvalue);
+		printf("Current number of seats available %d\n",currentvalue);
 
 
 		if(currentvalue != 0)
@@ -60,7 +61,7 @@ void bank_client()
 			sem_wait(&roomAvailable); // blocks if no room is available
 
 			sem_wait(&serviceAvailable);
-			printf("Thread   %u making transaction \n", (int) pthread_self());
+			printf("Customer %u making transaction \n", (int) pthread_self());
 			make_transaction();
 			break;
 
