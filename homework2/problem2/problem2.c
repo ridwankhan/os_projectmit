@@ -1,4 +1,14 @@
-int res = 0, num = 2, pd[2], arg[32];
+
+#include <semaphore.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <signal.h>
+
+int res = 2, num = 2, pd[2], arg[32];
 pthread_t thread[32];
 sem_t sem;
 
@@ -35,9 +45,10 @@ int main()
 				arg[k] = k;
 				pthread_create(&thread[k], NULL, f, (void *)&arg[k]);
 			}
+
 			for(k = 0; k < num; k++) pthread_join(thread[k], &tstatus);
 			if(num < 4) write(pd[1], &num, sizeof(num));
-
+			printf("res before exit %d\n",res );
 			exit(res);
 		}
 	}
@@ -48,6 +59,10 @@ int main()
 
 	for(i = 0; i < num; i++){
 		wait(&pstatus);
+		printf("res %d\n",res);
+		printf("Pstatus %d\n",pstatus );
+		printf("WIFEXITED %d\n", WIFEXITED(pstatus));
+		printf("WEXITSTATUS %d\n",WEXITSTATUS(pstatus) );
 		if(WIFEXITED(pstatus)) res += WEXITSTATUS(pstatus);
 	}
 
