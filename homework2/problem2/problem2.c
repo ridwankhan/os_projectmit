@@ -8,9 +8,11 @@
 #include <sys/types.h>
 #include <signal.h>
 
-int res = 2, num = 2, pd[2], arg[32];
+int res = 0, num = 2, pd[2], arg[32];
 pthread_t thread[32];
 sem_t sem;
+char c[10];
+//printf("Final result2: %c \n", *c[1]);
 
 void h(int s)
 {
