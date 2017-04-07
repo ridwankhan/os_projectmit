@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <sys/wait.h>
+#include <signal.h>
+//#include <sys/siginfo.h>
 
 int max(int array[], int first, int last)
 {
@@ -48,9 +50,7 @@ int partd(int array[],int index1, int index2)
     int maxd;
     int mind;
     int sumd;
-    int maxarray[2];
-    int minarray[2];
-    int sumarray[2];
+
     printf("parent pid is %d\n",getpid());
     // spawning the children
        pid=fork();
@@ -83,94 +83,100 @@ int partd(int array[],int index1, int index2)
                     if (pid==0)
                     {
                         child[4]=getpid();        
-                 }
-                 else
-               {pid=fork();
-                 if (pid==0)
+                    }
+                
+                else
                 {
-                 child[5]=getpid();
-                }    
+                pid=fork();
+                 if (pid==0)
+                    {
+                        child[5]=getpid();
+                    }    
 
                 }
           }
       }
 
-        //child 1
+        //child 0
      if (getpid()==child[0])
     { 
-        int max1,min1,sum1;
-        int child1max,child1min,child1sum;
-        int child1totalmax, child1totalmin, child1totalsum;
-
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        printf("child 1\n");
+        printf("child 0\n");
         maxd = max(array,beginning,gap);
         mind = min(array,beginning,gap);
         sumd = sum(array,beginning,gap);
         int status;
+        
+        // wait for signal
+        struct siginfo_t infomax0;
+        sigset_t maskmax0;
+        sigemptyset(&maskmax0);
+        sigaddset(&maskmax0,SIGQUEUE);
+        sigwaitinfo(&maskmax0,infomax0);
+        // value returned by child 2
+        int maxfromchild2=infomax0.si_value;
+        // wait for child 2 and 3
         wait(&status);
         wait(&status);
+
         exit(0);
 
     }
-    //child 2
+    //child 1
     else if(getpid()==child[1])
     {
-        int max2,min2,sum2;
-        int child2max,child2min,child2sum;
-        int child2totalmax, child2totalmin, child2totalsum;
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        printf("child 2\n");
+        printf("child 1\n");
         maxd = max(array,gap+1,2*gap);
         mind = min(array,gap+1,2*gap);
         sumd = sum(array,gap+1,2*gap);
         int status;
+        // wait for child 4 and 5
        wait(&status);
        wait(&status);
         exit(0);
     }
-    //child 3
+    //child 2
     else if (getpid()==child[2])
     {
-        int max3,min3,sum3;
-        int child3max,child3min,child3sum;
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        printf("child 3\n");
+        printf("child 2\n");
         maxd = max(array,2*gap+1, 3*gap);
         mind = min(array,2*gap+1, 3*gap);
         sumd = sum(array,2*gap+1, 3*gap);
        
+        union sigval child2max;
+        child2max.sival_int= maxd;
+        sigqueue(getppid(),SIGQUEUE,child2max);
         exit(0);
     }
-    //child 4
+    //child 3
     else if (getpid()==child[3])
     {
-        int max4,min4,sum4;
-        int child4max,child4min,child4sum;
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-         printf("child 4\n");
+        printf("child 3\n");
         maxd = max(array,3*gap+1,4*gap);
         mind = min(array,3*gap+1,4*gap);
         sumd = sum(array,3*gap+1,4*gap);
        
         exit(0);
     }
-    //child 5
+    //child 4
     else if (getpid()==child[4])
     {
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-         printf("child 5\n");
+        printf("child 4\n");
         maxd = max(array,4*gap+1,5*gap);
         mind = min(array,4*gap+1,5*gap);
         sumd = sum(array,4*gap+1,5*gap);
       
         exit(0);
     }
-    //child 6
+    //child 5
     else if (getpid()==child[5])
     {
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-         printf("child 6\n");
+        printf("child 5\n");
         maxd = max(array,5*gap+1,end);
         mind = min(array,5*gap+1,end);
         sumd = sum(array,5*gap+1,end);
@@ -180,12 +186,13 @@ int partd(int array[],int index1, int index2)
     //Parent
     else
     {
-    for (int child=0; child<5;child++)
-    {
-        int status;
-        pid_t pid=wait(&status);
-    } 
-exit(0);
+        for (int child=0; child<5;child++)
+        {
+            int status;
+            pid_t pid=wait(&status);
+        } 
+
+    exit(0);
     }
 }
 
