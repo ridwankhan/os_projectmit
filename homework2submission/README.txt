@@ -1,4 +1,4 @@
-To run our programming probmlems first type:
+To run our programming problems first type:
 make
 
 Then to run problem 1 type:
