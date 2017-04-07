@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 	for(int i=0; i<NUM_THREADS; i++)
 
 	{
-
+		//create threads
 		rc = pthread_create(&threads[i], NULL, (void *)bank_client, NULL);
 		
 	}
@@ -103,6 +103,7 @@ int main(int argc, char **argv)
 	
 	for(int j =0; j<NUM_THREADS; j++)
 	{
+		//join threads
 		int rc = pthread_join(threads[j], &status);
 		
 	}

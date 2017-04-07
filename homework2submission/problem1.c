@@ -7,11 +7,12 @@
 
 
 void sieve(int myArray[]){
+	//calculate sieve
 	
 	int number = myArray[0];
 	
 	int root = sqrt(myArray[0]);
-	//printf("root %d\n", root);
+	
 	
 
 	for (int i=2; i<=root; i++){
@@ -24,7 +25,7 @@ void sieve(int myArray[]){
 		}
 	}
 
-	
+	//print prime numbers
 	for (int i = 2; i<(number+1); i++){
 		if (myArray[i] ==1){
 			printf("Prime Number: %d\n", i);
@@ -36,6 +37,7 @@ void sieve(int myArray[]){
 
 
 void reversePrime(int myArray[]){
+	//find primes whose reverse is also a prime
 	int n;
 	int reverse;
 	int number = myArray[0];
@@ -44,6 +46,8 @@ void reversePrime(int myArray[]){
 	{
 		if (myArray[i] ==1)
 		{
+			//to reverse an integer used the following source
+			//http://www.programmingsimplified.com/c/source-code/c-program-reverse-number
 			n = i;
 			reverse = 0;
 			while (n != 0){
@@ -64,15 +68,19 @@ void reversePrime(int myArray[]){
 
 
 int main(int argc, char *argv[]){
-	//struct myStruct vars;
-	//args = malloc(sizeof(struct myStruct);
+	if (argc != 2){
+		fprintf(stderr, "usage: a.out <integer value>\n");
+		return -1;
+	}
+	
 	int number = atoi(argv[1]);
 	int myArray[number+1];
 	myArray[0] = number;
 
+	//initialize arrat values to 1 to be true
 	for (int i = 1; i<(number+1); i++){
 		myArray[i] = 1;
-		//printf("main %d\n", myArray[i]);
+	
 	}
 	
 
@@ -80,19 +88,19 @@ int main(int argc, char *argv[]){
 	pthread_t tid;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
-	
+	//create the thread
 	pthread_create(&tid, &attr, (void*)sieve, &myArray);
-	
-	//sieve(myArray);
-	//printf("returns\n");
+	//wait for thread to return
 	pthread_join(tid,NULL);
-	//printf("number %d\n", number );
+	
 	
 	pthread_t tid2;
 	pthread_attr_t attr2;
 	pthread_attr_init(&attr2);
-	
+
+	//create the thread
 	pthread_create(&tid2, &attr2, (void*)reversePrime, &myArray);
+	//wait for thread to return
 	pthread_join(tid2,NULL);
 	
 	
