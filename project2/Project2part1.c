@@ -108,14 +108,27 @@ int partd(int array[],int index1, int index2)
         int status;
         
         // wait for signal
-        struct siginfo_t infomax0;
+        siginfo_t infomax0;
         sigset_t maskmax0;
         sigemptyset(&maskmax0);
-        sigaddset(&maskmax0,SIGQUEUE);
-        sigwaitinfo(&maskmax0,infomax0);
+        sigaddset(&maskmax0,40);
+
+        printf("before\n");
+
+        
+        
+
+        if (sigwaitinfo(&maskmax0,&infomax0)==-1)
+        {
+            printf("sigwait failed\n");
+        }
+        printf("after\n");
         // value returned by child 2
-        int maxfromchild2=infomax0.si_value;
+        union sigval maxfromchild2= infomax0.si_value;
+
+        printf("Value got from chid is %d", maxfromchild2.sival_int);
         // wait for child 2 and 3
+
         wait(&status);
         wait(&status);
 
@@ -135,6 +148,7 @@ int partd(int array[],int index1, int index2)
        wait(&status);
        wait(&status);
         exit(0);
+
     }
     //child 2
     else if (getpid()==child[2])
@@ -145,9 +159,11 @@ int partd(int array[],int index1, int index2)
         mind = min(array,2*gap+1, 3*gap);
         sumd = sum(array,2*gap+1, 3*gap);
        
+       printf("child 2 before\n");
         union sigval child2max;
         child2max.sival_int= maxd;
-        sigqueue(getppid(),SIGQUEUE,child2max);
+        sigqueue(getppid(),40,child2max);
+        printf("child 2 after\n");
         exit(0);
     }
     //child 3
