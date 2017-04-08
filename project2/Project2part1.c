@@ -113,6 +113,7 @@ int partd(int array[],int index1, int index2)
         int childrenmaxs[2];
 
         // wait for signal
+        
         siginfo_t infomax0;
         sigset_t maskmax0;
         sigemptyset(&maskmax0);
@@ -136,9 +137,9 @@ int partd(int array[],int index1, int index2)
                 actualmax = childrenmaxs[1];
             }
             
-            printf("Actual max value is %d \n",actualmax);
+            //printf("Actual max value is %d \n",actualmax);
         // wait for child 2 and 3
-/*
+
         union sigval child0max;
         child0max.sival_int= maxd;
 
@@ -148,7 +149,7 @@ int partd(int array[],int index1, int index2)
         }
 
         sigqueue(getppid(),SIGQUEUE,child0max);
-        */
+        
         wait(&status);
         wait(&status);
 
@@ -191,8 +192,8 @@ int partd(int array[],int index1, int index2)
                 actualmax = childrenmaxs[1];
             }
             
-            printf("Actual max value is %d \n",actualmax);
-            /*
+            //printf("Actual max value is %d \n",actualmax);
+            
         union sigval child1max;
         child1max.sival_int= maxd;
 
@@ -202,7 +203,7 @@ int partd(int array[],int index1, int index2)
         }
 
         sigqueue(getppid(),SIGQUEUE,child1max);
-        */
+        
         //wait for child 4 and 5
        wait(&status);
        wait(&status);
@@ -276,13 +277,46 @@ int partd(int array[],int index1, int index2)
     }
     //Parent
     else
-    {
+    {	
+
+ 		int childrenmaxs[2];
+
+        // wait for signal
+        siginfo_t infomaxmain;
+        sigset_t maskmaxmain;
+        sigemptyset(&maskmaxmain);
+        sigaddset(&maskmaxmain,SIGQUEUE);
+
+        sigprocmask(SIG_BLOCK,&maskmaxmain,NULL);
+        
+        for(int i =0; i<2; i++)
+        {
+
+            sigwaitinfo(&maskmaxmain,&infomaxmain);
+            //getting values from the ch
+            childrenmaxs[i] = infomaxmain.si_value.sival_int;
+
+        }
+        
+            int actualmax = childrenmaxs[0];
+
+            if(actualmax<childrenmaxs[1])
+            {
+                actualmax = childrenmaxs[1];
+            }
+            
+            printf("Actual max value is %d \n",actualmax);
+
+    	wait(NULL);
+    	wait(NULL);
+
 
         for (int child=0; child<5;child++)
         {
 
             int status;
             pid_t pid=wait(&status);
+
         } 
         
         
