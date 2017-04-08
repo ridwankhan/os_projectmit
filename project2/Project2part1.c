@@ -4,7 +4,10 @@
 #include <math.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <sys/types.h>
 //#include <sys/siginfo.h>
+
+#define SIGQUEUE SIGRTMIN+1
 
 int max(int array[], int first, int last)
 {
@@ -55,7 +58,7 @@ int partd(int array[],int index1, int index2)
     // spawning the children
        pid=fork();
         if (pid==0)
-      {
+        {
             child[0]=getpid();
             pid=fork();
             if (pid==0)
@@ -107,28 +110,45 @@ int partd(int array[],int index1, int index2)
         sumd = sum(array,beginning,gap);
         int status;
         
+        int childrenmaxs[2];
+
         // wait for signal
         siginfo_t infomax0;
         sigset_t maskmax0;
         sigemptyset(&maskmax0);
-        sigaddset(&maskmax0,40);
+        sigaddset(&maskmax0,SIGQUEUE);
 
-        printf("before\n");
-
+        sigprocmask(SIG_BLOCK,&maskmax0,NULL);
         
-        
-
-        if (sigwaitinfo(&maskmax0,&infomax0)==-1)
+        for(int i =0; i<2; i++)
         {
-            printf("sigwait failed\n");
+
+            sigwaitinfo(&maskmax0,&infomax0);
+            //getting values from the ch
+            childrenmaxs[i] = infomax0.si_value.sival_int;
+
         }
-        printf("after\n");
-        // value returned by child 2
-        union sigval maxfromchild2= infomax0.si_value;
+        
+            int actualmax = childrenmaxs[0];
 
-        printf("Value got from chid is %d", maxfromchild2.sival_int);
+            if(actualmax<childrenmaxs[1])
+            {
+                actualmax = childrenmaxs[1];
+            }
+            
+            printf("Actual max value is %d \n",actualmax);
         // wait for child 2 and 3
+/*
+        union sigval child0max;
+        child0max.sival_int= maxd;
 
+        if(actualmax>maxd)
+        {
+            child0max.sival_int = actualmax;
+        }
+
+        sigqueue(getppid(),SIGQUEUE,child0max);
+        */
         wait(&status);
         wait(&status);
 
@@ -144,7 +164,46 @@ int partd(int array[],int index1, int index2)
         mind = min(array,gap+1,2*gap);
         sumd = sum(array,gap+1,2*gap);
         int status;
-        // wait for child 4 and 5
+
+        int childrenmaxs[2];
+
+        // wait for signal
+        siginfo_t infomax1;
+        sigset_t maskmax1;
+        sigemptyset(&maskmax1);
+        sigaddset(&maskmax1,SIGQUEUE);
+
+        sigprocmask(SIG_BLOCK,&maskmax1,NULL);
+        
+        for(int i =0; i<2; i++)
+        {
+
+            sigwaitinfo(&maskmax1,&infomax1);
+            //getting values from the ch
+            childrenmaxs[i] = infomax1.si_value.sival_int;
+
+        }
+        
+            int actualmax = childrenmaxs[0];
+
+            if(actualmax<childrenmaxs[1])
+            {
+                actualmax = childrenmaxs[1];
+            }
+            
+            printf("Actual max value is %d \n",actualmax);
+            /*
+        union sigval child1max;
+        child1max.sival_int= maxd;
+
+        if(actualmax>maxd)
+        {
+            child1max.sival_int = actualmax;
+        }
+
+        sigqueue(getppid(),SIGQUEUE,child1max);
+        */
+        //wait for child 4 and 5
        wait(&status);
        wait(&status);
         exit(0);
@@ -155,15 +214,17 @@ int partd(int array[],int index1, int index2)
     {
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
         printf("child 2\n");
+
         maxd = max(array,2*gap+1, 3*gap);
         mind = min(array,2*gap+1, 3*gap);
         sumd = sum(array,2*gap+1, 3*gap);
        
-       printf("child 2 before\n");
+       
         union sigval child2max;
         child2max.sival_int= maxd;
-        sigqueue(getppid(),40,child2max);
-        printf("child 2 after\n");
+
+        sigqueue(getppid(),SIGQUEUE,child2max);
+        
         exit(0);
     }
     //child 3
@@ -175,6 +236,10 @@ int partd(int array[],int index1, int index2)
         mind = min(array,3*gap+1,4*gap);
         sumd = sum(array,3*gap+1,4*gap);
        
+        union sigval child3max;
+        child3max.sival_int= maxd;
+
+        sigqueue(getppid(),SIGQUEUE,child3max);
         exit(0);
     }
     //child 4
@@ -185,6 +250,11 @@ int partd(int array[],int index1, int index2)
         maxd = max(array,4*gap+1,5*gap);
         mind = min(array,4*gap+1,5*gap);
         sumd = sum(array,4*gap+1,5*gap);
+
+        union sigval child4max;
+        child4max.sival_int= maxd;
+
+        sigqueue(getppid(),SIGQUEUE,child4max);
       
         exit(0);
     }
@@ -196,17 +266,27 @@ int partd(int array[],int index1, int index2)
         maxd = max(array,5*gap+1,end);
         mind = min(array,5*gap+1,end);
         sumd = sum(array,5*gap+1,end);
+
+        union sigval child5max;
+        child5max.sival_int= maxd;
+
+        sigqueue(getppid(),SIGQUEUE,child5max);
    
         exit(0);
     }
     //Parent
     else
     {
+
         for (int child=0; child<5;child++)
         {
+
             int status;
             pid_t pid=wait(&status);
         } 
+        
+        
+
 
     exit(0);
     }
