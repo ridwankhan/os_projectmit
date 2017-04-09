@@ -111,6 +111,7 @@ int partd(int array[],int index1, int index2)
         int status;
         
         int childrenmaxs[2];
+        int childrenmins[2];
 
         // wait for signal
         
@@ -121,20 +122,46 @@ int partd(int array[],int index1, int index2)
 
         sigprocmask(SIG_BLOCK,&maskmax0,NULL);
         
-        for(int i =0; i<2; i++)
+        for(int i =0; i<4; i++)
         {
 
             sigwaitinfo(&maskmax0,&infomax0);
             //getting values from the ch
+            if(i==0){
+
             childrenmaxs[i] = infomax0.si_value.sival_int;
+        	}
+
+        	else if(i==1)
+        	{
+        		childrenmins[i-1] = infomax0.si_value.sival_int;
+        	}
+        	else if(i==2)
+        	{
+        		childrenmaxs[i-1] = infomax0.si_value.sival_int;
+        	}
+        	else if(i==3)
+        	{
+        		childrenmins[i-2] = infomax0.si_value.sival_int;
+        	}
 
         }
+
         
             int actualmax = childrenmaxs[0];
 
             if(actualmax<childrenmaxs[1])
             {
                 actualmax = childrenmaxs[1];
+            }
+
+            /////
+
+            int actualmin = childrenmins[0];
+
+            if(actualmin>childrenmins[1])
+            {
+                actualmin = childrenmins[1];
             }
             
             //printf("Actual max value is %d \n",actualmax);
@@ -149,6 +176,16 @@ int partd(int array[],int index1, int index2)
         }
 
         sigqueue(getppid(),SIGQUEUE,child0max);
+
+        union sigval child0min;
+        child0min.sival_int= mind;
+        printf("child0 own : %d", mind);
+        if(actualmin<mind)
+        {
+            child0min.sival_int = actualmin;
+        }
+
+        sigqueue(getppid(),SIGQUEUE,child0min);
         
         wait(&status);
         wait(&status);
@@ -167,6 +204,7 @@ int partd(int array[],int index1, int index2)
         int status;
 
         int childrenmaxs[2];
+        int childrenmins[2];
 
         // wait for signal
         siginfo_t infomax1;
@@ -176,14 +214,33 @@ int partd(int array[],int index1, int index2)
 
         sigprocmask(SIG_BLOCK,&maskmax1,NULL);
         
-        for(int i =0; i<2; i++)
+        for(int i =0; i<4; i++)
         {
 
             sigwaitinfo(&maskmax1,&infomax1);
             //getting values from the ch
+            if(i == 0)
+            {
             childrenmaxs[i] = infomax1.si_value.sival_int;
+        	}
+
+        	else if(i == 1)
+        	{
+        	childrenmins[i-1] = infomax1.si_value.sival_int;
+        	}
+
+        	else if(i == 2)
+        	{
+        		childrenmaxs[i-1] = infomax1.si_value.sival_int;
+        	}
+        	else if(i == 3)
+        	{
+        		childrenmins[i-2] = infomax1.si_value.sival_int;
+        	}
 
         }
+
+
         
             int actualmax = childrenmaxs[0];
 
@@ -191,7 +248,13 @@ int partd(int array[],int index1, int index2)
             {
                 actualmax = childrenmaxs[1];
             }
-            
+            /////
+            int actualmin = childrenmins[0];
+
+            if(actualmin>childrenmins[1])
+            {
+                actualmin = childrenmins[1];
+            }
             //printf("Actual max value is %d \n",actualmax);
             
         union sigval child1max;
@@ -204,6 +267,19 @@ int partd(int array[],int index1, int index2)
 
         sigqueue(getppid(),SIGQUEUE,child1max);
         
+        //////
+        union sigval child1min;
+        child1min.sival_int= mind;
+        printf("child1 own : %d", mind);
+
+        if(actualmin<mind)
+        {
+            child1min.sival_int = actualmin;
+        }
+
+        sigqueue(getppid(),SIGQUEUE,child1min);
+
+
         //wait for child 4 and 5
        wait(&status);
        wait(&status);
@@ -225,6 +301,11 @@ int partd(int array[],int index1, int index2)
         child2max.sival_int= maxd;
 
         sigqueue(getppid(),SIGQUEUE,child2max);
+
+        union sigval child2min;
+        child2min.sival_int= mind;
+
+        sigqueue(getppid(),SIGQUEUE,child2min);
         
         exit(0);
     }
@@ -241,6 +322,11 @@ int partd(int array[],int index1, int index2)
         child3max.sival_int= maxd;
 
         sigqueue(getppid(),SIGQUEUE,child3max);
+
+        union sigval child3min;
+        child3min.sival_int= mind;
+
+        sigqueue(getppid(),SIGQUEUE,child3min);
         exit(0);
     }
     //child 4
@@ -256,6 +342,11 @@ int partd(int array[],int index1, int index2)
         child4max.sival_int= maxd;
 
         sigqueue(getppid(),SIGQUEUE,child4max);
+
+        union sigval child4min;
+        child4min.sival_int= mind;
+
+        sigqueue(getppid(),SIGQUEUE,child4min);
       
         exit(0);
     }
@@ -272,7 +363,12 @@ int partd(int array[],int index1, int index2)
         child5max.sival_int= maxd;
 
         sigqueue(getppid(),SIGQUEUE,child5max);
-   
+   		
+   		union sigval child5min;
+        child5min.sival_int= mind;
+
+        sigqueue(getppid(),SIGQUEUE,child5min);
+        printf("child 5 min: %d", mind);
         exit(0);
     }
     //Parent
@@ -280,6 +376,7 @@ int partd(int array[],int index1, int index2)
     {	
 
  		int childrenmaxs[2];
+ 		int childrenmins[2];
 
         // wait for signal
         siginfo_t infomaxmain;
@@ -289,14 +386,31 @@ int partd(int array[],int index1, int index2)
 
         sigprocmask(SIG_BLOCK,&maskmaxmain,NULL);
         
-        for(int i =0; i<2; i++)
+        for(int i =0; i<4; i++)
         {
-
+        	
             sigwaitinfo(&maskmaxmain,&infomaxmain);
             //getting values from the ch
+
+            if(i == 0){
             childrenmaxs[i] = infomaxmain.si_value.sival_int;
+        	}
+        	else if(i==1)
+        	{
+        		childrenmins[i-1] = childrenmins[i] = infomaxmain.si_value.sival_int;
+        	}
+        	else if(i==2)
+        	{
+        		childrenmaxs[i-1] = infomaxmain.si_value.sival_int;
+        	}
+        	else if(i==3)
+        	{
+        		childrenmins[i-2] = childrenmins[i] = infomaxmain.si_value.sival_int;
+        	}
 
         }
+
+        
         
             int actualmax = childrenmaxs[0];
 
@@ -305,7 +419,16 @@ int partd(int array[],int index1, int index2)
                 actualmax = childrenmaxs[1];
             }
             
+            int actualmin = childrenmins[0];
+
+            if(actualmin>childrenmins[1])
+            {
+                actualmin = childrenmins[1];
+            }
+
             printf("Actual max value is %d \n",actualmax);
+            printf("Actual min value is %d \n",actualmin);
+
 
     	wait(NULL);
     	wait(NULL);
