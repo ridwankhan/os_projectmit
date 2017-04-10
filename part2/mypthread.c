@@ -20,7 +20,7 @@ int threadCount=1;
 int numThreadNodes=0;
 int excutingThread=1;
 
-#define MEM_STACK 1024*4;
+#define MEM_STACK 1024*4
 
 void add_node(){
 	mypthread_t threadname; //create instance of thread
@@ -39,7 +39,7 @@ void add_to_queue(mypthread_t* threadname){
 	else
 	{
 		add_node();
-		tail->next = temp
+		tail->next = temp;
 		tail=temp;
 		tail->next= head;
 	}
@@ -70,7 +70,7 @@ mypthread_t* find_next_active(int currentid)
 	temp= head; // set temp to head
 	do   // search all tids stored in the linked list
 	{
-		if (temp->ptr->tid == findid) // if you find the tid
+		if (temp->ptr->tid == currentid) // if you find the tid
 		{
 			break;  // break out of loop
 		}
@@ -122,7 +122,7 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr, void *(*
 	getcontext(thread->ucp);
 	(*thread).ucp->uc_stack.ss_sp = malloc(MEM_STACK);
 	(*thread).ucp->uc_stack.ss_size = 4096;
-	(*thread).stae = 0;
+	(*thread).state = 0;
 	thread->tid = threadCount++;
 	makecontext(thread->ucp, (void(*)()) start_routine, 1, arg);
 	add_to_queue(thread);
@@ -147,12 +147,33 @@ void mypthread_exit (void *retval){
 	setcontext(upnext->ucp);
 }
   
-    
-/* Write your thread yield function here...
-void mypthread_yield (... )...    */
+int mypthread_yield (void){
+	mypthread_t* exec_thread = find_thread(excutingThread);
+	mypthread_t* upnext =find_next_active(exec_thread->tid);
+	if (excutingThread==upnext->tid){
+		return 0;
+	}
+	excutingThread = upnext->tid;
+	swapcontext(exec_thread->ucp,upnext->ucp);
+	return 0;
+}
 
-/*  Write your thread join function here...
-  void mypthread_join (... )...    */
+
+ int mypthread_join (mypthread_t thread, void **retval){
+ 	int t = thread.tid;
+ 	mypthread_t* exec_thread = find_thread(excutingThread);
+ 	mypthread_t* t_thread=find_thread(thread.tid);
+ 	if (t_thread->state != 0)
+ 	{
+ 		return 0; 
+ 	}
+ 	else
+ 	{
+ 		exec_thread->state=1;
+ 		t_thread->jointid = excutingThread;
+ 		excutingThread=t;
+ 		swapcontext(exec_thread->ucp,t_thread->ucp);
+ 	}
+ 	return 0;
+ }
     
-/* Write whatever function is left here ....
-  void mypthread_whatever (... ) ...
