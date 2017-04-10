@@ -9,18 +9,31 @@
 #include <stdlib.h>
 #include <errno.h>
 
-struct threadNode; //defined in .c class
+//struct threadNode; //defined in .c class
 
 typedef struct{
     //Thread ID
-    short tid;
+    int tid;
     //Pointer to thread node 
-    struct threadNode * mynode;
+    // struct inside struct seems bad so we took it out
+    //struct threadNode * mynode;
+    ucontext_t *ucp;
+    // active =0 blocked=1 dead =2 for the states
+    int state;
+    int jointid;
+
 } mypthread_t;
+
+struct threadNode{
+	struct threadNode * next; // next thread
+	mypthread_t *ptr; // pointer to thread
+} *head, *tail,*temp;
+
 
 typedef struct {
     //Not specified to implement in project instructions but decided to do it anyway.
 } mypthread_attr_t;
+
 
 // Functions
 int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr, void *(*start_routine) (void *), void *arg);
