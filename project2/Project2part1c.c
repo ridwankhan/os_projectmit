@@ -25,7 +25,7 @@ void ctrlcHandler(int signum, siginfo_t *info, void *ptr){
 
 }
 
-void ctrlzHandler(int signum1, siginfo_t *info1, void *ptr1){
+void quitHandler(int signum1, siginfo_t *info1, void *ptr1){
 
     printf("\n SIGQUIT was sent and the signal number is %d \n",signum1);
     printf("The signal was sent to PID: %d \n",getpid()); // prints the parents PID
@@ -637,7 +637,7 @@ sigaction(SIGINT,&act, NULL);
 
 struct sigaction act1; // sigaction struct for handling SIGSTOP
 memset(&act1,0,sizeof(act1));
-act1.sa_sigaction = ctrlzHandler;
+act1.sa_sigaction = quitHandler;
 act1.sa_flags = SA_SIGINFO;
 sigaction(SIGQUIT,&act1,NULL);
 
