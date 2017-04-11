@@ -17,7 +17,8 @@ typedef struct{
     //Pointer to thread node 
     // struct inside struct seems bad so we took it out
     //struct threadNode * mynode;
-    ucontext_t *ucp;
+    ucontext_t *ucp;//context pointer
+
     // active =0 blocked=1 dead =2 for the states
     int state;
     int jointid;

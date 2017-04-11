@@ -126,18 +126,26 @@ int mypthread_yield (void){
 
  int mypthread_join (mypthread_t thread, void **retval){
  	//printf("Join\n");
+ 	//get the thread id of thread
  	int t = thread.tid;
+ 	//find currently executing thread
  	mypthread_t* exec_thread = find_thread(excutingThread);
+ 	
+ 	//find thread 
  	mypthread_t* t_thread=find_thread(thread.tid);
  	if (t_thread->state != 0)
  	{
- 		return 0; 
+ 		return 0;  //if the thread is not active return
  	}
  	else
  	{
+ 		//if it is active set the executing thread state to blocked
  		exec_thread->state=1;
+
  		t_thread->jointid = excutingThread;
+ 		//make thread t the executing thread
  		excutingThread=t;
+ 		//swap the context and make thread the executing thread
  		swapcontext(exec_thread->ucp,t_thread->ucp);
  	}
  	return 0;
