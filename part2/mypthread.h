@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
-//struct threadNode; //defined in .c class
+//struct threadNode
 
 typedef struct{
     //Thread ID
