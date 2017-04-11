@@ -13,14 +13,15 @@
 #define SIGMAX SIGRTMIN+1
 #define SIGMIN SIGRTMIN+2
 #define SIGSUM SIGRTMIN+3
-
+#define SIGNOINFO SIGRTMIN
+int noinfotosend =0;
 
 
 void siguserhandler(int signum, siginfo_t *info,void *ptr ){
     printf("hello\n");
     printf("Signal origninates from process %lu\n",(unsigned long) info->si_pid );
     printf("I am %d killing %d\n",getpid(), info->si_pid);
-    if (kill(info->si_pid,SIGKILL) ==0){
+    if (kill(info->si_pid,SIGTERM) ==0){
         printf("kill succesful again\n");
     }
 
@@ -33,6 +34,7 @@ void handler(int signum, siginfo_t *info, void *ptr) {
    
     printf("%d, %d\n",getpid(), getppid() );
     printf("send the fucking signal\n");
+    noinfotosend = 1; // updating the flag
 
     if(kill(getppid(),SIGUSR1) == 0)
     {
@@ -153,6 +155,7 @@ int partd(int array[],int index1, int index2)
         sigaddset(&maskmax0,SIGMAX);
         sigaddset(&maskmax0,SIGMIN);
         sigaddset(&maskmax0,SIGSUM);
+        sigaddset(&maskmax0,SIGNOINFO);
 
         sigprocmask(SIG_BLOCK,&maskmax0,NULL);
 
@@ -165,6 +168,7 @@ int partd(int array[],int index1, int index2)
 
             sigwaitinfo(&maskmax0,&infomax0);
             int signum = infomax0.si_signo;
+           // printf("signal number is %d\n  ", signum);
             //getting values from the ch
             if(signum == SIGMAX){
                 childrenmaxs[maxindex] = infomax0.si_value.sival_int;
@@ -178,6 +182,11 @@ int partd(int array[],int index1, int index2)
             else if(signum == SIGSUM){
                 childrensums = infomax0.si_value.sival_int + childrensums;
                 
+            }
+            else if(signum == SIGNOINFO){
+                printf("hellooooo from child 00 \n");
+                continue;
+
             }
 
         }   
@@ -257,6 +266,7 @@ int partd(int array[],int index1, int index2)
         sigaddset(&maskmax1,SIGMAX);
         sigaddset(&maskmax1,SIGMIN);
         sigaddset(&maskmax1,SIGSUM);
+        sigaddset(&maskmax1,SIGNOINFO);
 
         sigprocmask(SIG_BLOCK,&maskmax1,NULL);
 
@@ -281,6 +291,10 @@ int partd(int array[],int index1, int index2)
             }
             else if(signum == SIGSUM){
                 childrensums = childrensums + infomax1.si_value.sival_int;
+
+            }
+            else if(signum == SIGNOINFO){
+                continue;
 
             }
 
@@ -341,10 +355,12 @@ int partd(int array[],int index1, int index2)
 
 
         alarm(3); // this will send itself the SIGALRM signal after 3 seconds 
-        printf("Sleepin\n");
-        sleep(4);
         
-       
+        
+        printf("Sleepin\n");
+        
+        sleep(3);
+        
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
         printf("child 2\n");
 
@@ -356,6 +372,10 @@ int partd(int array[],int index1, int index2)
         union sigval child2max;
 
         child2max.sival_int= maxd;
+        
+        // flag to check if you should send signal or not 
+        if(noinfotosend == 0)
+    {
 
         if(sigqueue(getppid(),SIGMAX,child2max) == -1)
         {
@@ -381,7 +401,8 @@ int partd(int array[],int index1, int index2)
         child2sum.sival_int= sumd;
 
         printf("child2sum is %d \n", sumd);
-      
+        
+        //sleep(3);
         if(sigqueue(getppid(),SIGSUM,child2sum) == -1)
         {
             printf("fail in child 2 sum \n");
@@ -389,7 +410,20 @@ int partd(int array[],int index1, int index2)
         else{
             printf("success in child 2 sum\n");
         }
-        printf("i am here now\n");
+    }
+    // if flag is set to one, the process is going to be killed and should not send any info 
+
+    else if(noinfotosend == 1){
+        union sigval child2novalue;
+        child2novalue.sival_int = 0;
+        if(sigqueue(getppid(), SIGNOINFO,child2novalue) == -1)
+        {
+            printf("Faillllll in child 2 \n");
+        }
+        printf("hasdsdasd \n");
+        return(0);
+     }
+        
         exit(0);
     }
     //child 3
