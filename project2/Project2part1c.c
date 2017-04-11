@@ -8,36 +8,43 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <string.h>
+
 //#include <sys/siginfo.h>
 
 #define SIGMAX SIGRTMIN+1
 #define SIGMIN SIGRTMIN+2
 #define SIGSUM SIGRTMIN+3
-#define SIGNOINFO SIGRTMIN
-int noinfotosend =0;
 
+void ctrlcHandler(int signum, siginfo_t *info, void *ptr){
 
-void siguserhandler(int signum, siginfo_t *info,void *ptr ){
-    printf("In siguserhandler\n");
-    printf("Signal origninates from process %lu\n",(unsigned long) info->si_pid );
-    printf("I am %d killing %d\n",getpid(), info->si_pid);
-    if (kill(info->si_pid,SIGTERM) ==0)
-    {
-        printf("kill succesful again\n");
-    }
+    printf("\n SIGINT was pressed and the signal number is %d \n",signum);
+    printf("The signal was sent to PID: %d  \n",getpid()); // prints the parents PID
+    //printf("The signal was sent from PID: %d \n",(int) info->si_pid);
+
+    exit(signum);
+
 }
 
-void handler(int signum, siginfo_t *info, void *ptr) {
-    printf("In handler\n");   
-    printf("pid: %d,parentpid: %d\n",getpid(), getppid() );
-    printf("updating noinfotosend to 1\n");
-    noinfotosend = 1; // updating the flag
+void ctrlzHandler(int signum1, siginfo_t *info1, void *ptr1){
 
-    if(kill(getppid(),SIGUSR1) == 0)
-    {
-        printf("kill succesful \n");
-    }
+    printf("\n SIGQUIT was sent and the signal number is %d \n",signum1);
+    printf("The signal was sent to PID: %d \n",getpid()); // prints the parents PID
+    //printf("The signal was sent from PID: %d \n",(int) info1->si_pid);
+
+    exit(signum1);
+
 }
+
+void sigtermHandler(int signum2, siginfo_t *info2, void *ptr2){
+
+    printf("\n SIGTERM was sent and the signal number is %d \n",signum2);
+    printf("The signal was sent to PID: %d \n",getpid()); // prints the parents PID
+    //printf("The signal was sent from PID: %d \n",(int) info1->si_pid);
+
+    exit(signum2);
+
+}
+
 
 int max(int array[], int first, int last)
 {
@@ -71,18 +78,8 @@ int sum(int array[], int first, int last)
     return summation;
 }
 
-void printarray(int *array, int arraysize)
-{
-    printf("[ ");
-    for (int i =0; i<arraysize;i++)
-    {
-        printf(" %d ",array[i]);
-    }
-    printf(" ] \n");
-}
 int partd(int array[],int index1, int index2)
 {
-
     int beginning=index1;
     int end=index2;
     int gap= ceil((end-beginning)/6);
@@ -112,11 +109,12 @@ int partd(int array[],int index1, int index2)
              if (pid==0)
                 {
                 child[3]=getpid();
+                
                 }
             }
         }
         else if (pid>0)
-        {
+            {
                 pid=fork();
                 if (pid==0)
                 {
@@ -127,21 +125,21 @@ int partd(int array[],int index1, int index2)
                         child[4]=getpid();        
                     }
                 
-                    else
+                else
+                {
+                pid=fork();
+                 if (pid==0)
                     {
-                    pid=fork();
-                     if (pid==0)
-                        {
-                            child[5]=getpid();
-                        }    
-                    }
+                        child[5]=getpid();
+                    }    
+
                 }
-        }
+          }
+      }
 
         //child 0
      if (getpid()==child[0])
     { 
-        
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
         printf("child 0\n");
         maxd = max(array,beginning,gap);
@@ -160,61 +158,41 @@ int partd(int array[],int index1, int index2)
         sigaddset(&maskmax0,SIGMAX);
         sigaddset(&maskmax0,SIGMIN);
         sigaddset(&maskmax0,SIGSUM);
-        sigaddset(&maskmax0,SIGNOINFO);
 
         sigprocmask(SIG_BLOCK,&maskmax0,NULL);
 
-        int minindex =0;
+        int minindex = 0;
         int maxindex =0;
-        ///
+        
         
         for(int i =0; i<6; i++)
         {
-            printf("child 0 waiting for %dth signal\n",i + 1);
+
             sigwaitinfo(&maskmax0,&infomax0);
             int signum = infomax0.si_signo;
-           // printf("signal number is %d\n  ", signum);
             //getting values from the ch
             if(signum == SIGMAX){
                 childrenmaxs[maxindex] = infomax0.si_value.sival_int;
                 maxindex++;
-                printf("signal %d recieved is max\n", i+1);
+                
             }
             else if(signum == SIGMIN){
                 childrenmins[minindex] = infomax0.si_value.sival_int;
                 minindex++;
-                printf("signal %d recieved is min\n", i+1);
             }
             else if(signum == SIGSUM){
                 childrensums = infomax0.si_value.sival_int + childrensums;
-                printf("signal %d recieved is sum\n", i+1);
                 
-            }
-            else if(signum == SIGNOINFO){
-                printf("signal %d recieved is SIGNOINFO\n", i+1);
-                continue;
             }
 
         }   
-            printf("printing childrenmaxs recieved by child 0: ");
-            printarray(childrenmaxs,2);
-            printf("printing childrenmins recieved by child 0: ");
-            printarray(childrenmins,2);
-            printf("printing childrensums recieved by child 0: %d \n", childrensums);
-
-            int actualmax;
-            int actualmin;
-            int actualsum;
-    
-          if (childrenmaxs[0]!=-2147483647 || childrenmaxs[1]!=-2147483647)
-        {
-            actualmax = childrenmaxs[0];
-            actualmin = childrenmins[0];
-            actualsum = childrensums + sumd;
+            //printf("sum value in child 0 is %d \n", childrensums);
+            int actualmax = childrenmaxs[0];
+            int actualmin = childrenmins[0];
+            int actualsum = childrensums + sumd;
             //printf("sum value of child 0 itself %d \n", sumd);
-            if(childrenmaxs[1]!=-2147483647 || childrenmaxs[1]!=-2147483647){
 
-            if(actualmax<childrenmaxs[1]) 
+            if(actualmax<childrenmaxs[1])
             {
                 actualmax = childrenmaxs[1];
             }
@@ -223,15 +201,7 @@ int partd(int array[],int index1, int index2)
             {
                 actualmin = childrenmaxs[1];
             }
-                 }
-
-            else{
-                actualmin = -2147483647;
-                actualmax = -2147483647;
-                actualsum = -2147483647;
-            }
             
-        }
 
         union sigval child0max;
         child0max.sival_int= maxd;
@@ -292,7 +262,6 @@ int partd(int array[],int index1, int index2)
         sigaddset(&maskmax1,SIGMAX);
         sigaddset(&maskmax1,SIGMIN);
         sigaddset(&maskmax1,SIGSUM);
-        sigaddset(&maskmax1,SIGNOINFO);
 
         sigprocmask(SIG_BLOCK,&maskmax1,NULL);
 
@@ -317,10 +286,6 @@ int partd(int array[],int index1, int index2)
             }
             else if(signum == SIGSUM){
                 childrensums = childrensums + infomax1.si_value.sival_int;
-
-            }
-            else if(signum == SIGNOINFO){
-                continue;
 
             }
 
@@ -380,10 +345,6 @@ int partd(int array[],int index1, int index2)
     {
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
         printf("child 2\n");
-        
-        alarm(3); // this will send itself the SIGALRM signal after 3 seconds 
-        printf("Sleeping for 3 seconds\n");
-        sleep(3);
 
         maxd = max(array,2*gap+1, 3*gap);
         mind = min(array,2*gap+1, 3*gap);
@@ -393,11 +354,6 @@ int partd(int array[],int index1, int index2)
         union sigval child2max;
 
         child2max.sival_int= maxd;
-        
-        // flag to check if you should send signal or not 
-        printf("noinfotosend: %d \n",noinfotosend);
-        if(noinfotosend == 0)
-    {
 
         if(sigqueue(getppid(),SIGMAX,child2max) == -1)
         {
@@ -423,8 +379,6 @@ int partd(int array[],int index1, int index2)
         child2sum.sival_int= sumd;
 
         printf("child2sum is %d \n", sumd);
-        
-        //sleep(3);
         if(sigqueue(getppid(),SIGSUM,child2sum) == -1)
         {
             printf("fail in child 2 sum \n");
@@ -432,32 +386,12 @@ int partd(int array[],int index1, int index2)
         else{
             printf("success in child 2 sum\n");
         }
-    }
-    // if flag is set to one, the process is going to be killed and should not send any info 
 
-    else if(noinfotosend == 1){
-        for (int i=0;i<3;i++)
-        {
-            union sigval child2novalue;
-            child2novalue.sival_int = -2147483647;
-            if(sigqueue(getppid(), SIGNOINFO,child2novalue) == -1)
-            {
-                printf("Fail to send noinfotosend signal from child 2\n");
-            }
-            else
-            {
-            printf("noinfotosend was sent from child 2\n");
-            }
-        }
-        return(0);
-     }
-        
         exit(0);
     }
     //child 3
     else if (getpid()==child[3])
     {
-       
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
         printf("child 3\n");
         maxd = max(array,3*gap+1,4*gap);
@@ -481,7 +415,7 @@ int partd(int array[],int index1, int index2)
         union sigval child3min;
         child3min.sival_int= mind;
 
-        //printf("child3sum is %d \n", sumd);
+        printf("child3sum is %d \n", sumd);
         if(sigqueue(getppid(),SIGMIN,child3min) == -1)
         {
             printf("fail in child 3 min \n");
@@ -559,6 +493,7 @@ int partd(int array[],int index1, int index2)
     //child 5
     else if (getpid()==child[5])
     {
+
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
         printf("child 5\n");
         maxd = max(array,5*gap+1,end);
@@ -632,6 +567,9 @@ int partd(int array[],int index1, int index2)
         for(int i =0; i<6; i++)
         {
 
+            //sleep(10); // opportunity to press ctrl c
+
+
             sigwaitinfo(&maskmaxmain,&infomaxmain);
             int signum = infomaxmain.si_signo;
             //getting values from the ch
@@ -662,7 +600,8 @@ int partd(int array[],int index1, int index2)
             {
                 actualmin = childrenmins[1];
             }
-            
+
+            sleep(10); //opportunity to press CTRL Csleep(10); // opportunity to press ctrl c
             printf("Actual max value is %d \n",actualmax);
             printf("Actual min value is %d \n",actualmin);
             printf("Actual sum value is %d \n",actualsum);
@@ -685,27 +624,30 @@ int partd(int array[],int index1, int index2)
 }
 
 int main(){
-//signal(SIGALRM, handler);
-    struct sigaction act;
-    memset(&act, 0, sizeof(act));
-
-    act.sa_sigaction = handler;
-    act.sa_flags = SA_SIGINFO;
-
-    sigaction(SIGALRM,&act,NULL);
-
-     struct sigaction act1;
-    memset(&act1, 0, sizeof(act1));
-
-    act1.sa_sigaction = siguserhandler;
-    act1.sa_flags = SA_SIGINFO;
-
-    sigaction(SIGUSR1, &act1, NULL);
-
-
 FILE* nums = fopen("numbers.txt", "r");
 int readnum = 0;
 int counter = 0;
+
+struct sigaction act; // sigaction struct for handling SIGINT
+memset(&act,0,sizeof(act));
+act.sa_sigaction = ctrlcHandler;
+act.sa_flags = SA_SIGINFO;
+sigaction(SIGINT,&act, NULL);
+
+
+struct sigaction act1; // sigaction struct for handling SIGSTOP
+memset(&act1,0,sizeof(act1));
+act1.sa_sigaction = ctrlzHandler;
+act1.sa_flags = SA_SIGINFO;
+sigaction(SIGQUIT,&act1,NULL);
+
+
+struct sigaction act2; // sigaction struct for handling SIGTERM
+memset(&act2,0,sizeof(act2));
+act2.sa_sigaction = sigtermHandler;
+act2.sa_flags = SA_SIGINFO;
+sigaction(SIGTERM,&act2,NULL);
+
 
 while(fscanf(nums, "%d,", &readnum) > 0 )
 {
