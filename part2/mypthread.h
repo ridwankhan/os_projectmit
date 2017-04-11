@@ -13,7 +13,7 @@
 
 typedef struct{
     //Thread ID
-    int tid;
+    short tid;
     //Pointer to thread node 
     // struct inside struct seems bad so we took it out
     //struct threadNode * mynode;
@@ -27,7 +27,7 @@ typedef struct{
 struct threadNode{
 	struct threadNode * next; // next thread
 	mypthread_t *ptr; // pointer to thread
-} *head, *tail,*temp;
+};
 
 
 typedef struct {

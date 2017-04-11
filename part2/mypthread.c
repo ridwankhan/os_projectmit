@@ -35,11 +35,10 @@ mypthread_t* find_thread(int findid);
 // must pass current id to work
 mypthread_t* find_next_active(int currentid);
 
-
-// Type your globals...
-
-// Type your own functions (void)
-// e.g., free up sets of data structures created in your library
+//nodes for linked list
+struct threadNode* head; //head node
+struct threadNode* tail; //tail node
+struct threadNode* temp; //temp node
 
     
 //  Write your thread create function here...
@@ -48,54 +47,78 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr, void *(*
 	//printf("Creating\n");
 	if (numThreadNodes == 0) // first thread being created
 	{
-		mypthread_t*parentthread= (mypthread_t *)malloc(sizeof(mypthread_t));
+		//this is creating the parent thread
+		mypthread_t* parentthread= (mypthread_t *)malloc(sizeof(mypthread_t));
+		//set thread id to thread count and increase thread count
 		parentthread->tid=threadCount++;
+		//set up the context of parent thread
 		ucontext_t* context = (ucontext_t*) malloc(sizeof(ucontext_t));
 		parentthread->ucp = context;
+		//allocate space and stack pointer
 		parentthread->ucp->uc_stack.ss_sp = malloc(MEM_STACK);
 		parentthread->ucp->uc_stack.ss_size = MEM_STACK;
+		//set to active state
 		parentthread->state = 0;
+		//add parent thread to to thread queue
 		add_to_queue(parentthread);
 	}
+	//set up context of thread
 	ucontext_t* context = (ucontext_t*) malloc(sizeof(ucontext_t));
+	//give thread context
 	thread->ucp = context;
 	getcontext(thread->ucp);
+	//allocate space and stack pointer
 	thread->ucp->uc_stack.ss_sp = malloc(MEM_STACK);
 	thread->ucp->uc_stack.ss_size = MEM_STACK;
-	thread->state = 0;
+	//set thread id to thread count and increase thread count
 	thread->tid = threadCount++;
+	//set state to active
+	thread->state = 0;
+	//make context with given function
 	makecontext(thread->ucp, (void(*)()) start_routine, 1, arg);
+	//add function to the queue
 	add_to_queue(thread);
 	return 0;
-
 } 
 
 void mypthread_exit (void *retval){
 	//printf("Exiting\n");
-
+	//find the thread
 	mypthread_t* exec_thread = find_thread(excutingThread);
-	exec_thread->state = 2;
+
+	exec_thread->state = 2; //set thread state to dead
 	free(exec_thread->ucp); //since thread exiting, give memory back
 	if (exec_thread->jointid != 0){
+		//find thread
 		mypthread_t* joining_thread = find_thread(exec_thread->jointid);
-		joining_thread->state = 0;
+
+		joining_thread->state = 0;//set state to active
 	}
+	//find next active thread
 	mypthread_t* upnext =find_next_active(exec_thread->tid);
+	//if the next active thread found is this thread, return and stay running
 	if (excutingThread == upnext->tid){
 		return;
 	}
+	//thread id of executing thread is the next thread's id
 	excutingThread = upnext->tid;
+	//set context to next thread
 	setcontext(upnext->ucp);
 }
   
 int mypthread_yield (void){
 	//printf("Yielding\n");
+	//get the executing thread
 	mypthread_t* exec_thread = find_thread(excutingThread);
+	//find the thread to yield to, which is next active thread on the queue
 	mypthread_t* upnext =find_next_active(exec_thread->tid);
+	//if the next active is same thread just return
 	if (excutingThread==upnext->tid){
 		return 0;
 	}
+	//make next thread id the executing thread
 	excutingThread = upnext->tid;
+	//swap the context between the current thread context and the next context thread to yield
 	swapcontext(exec_thread->ucp,upnext->ucp);
 	return 0;
 }
@@ -130,13 +153,13 @@ void add_to_queue(mypthread_t* threadname){
 	if (head==NULL)
 	{
 		// first node in list
-		add_node();
+		add_node();	//add this new node
 		head=temp; // set head to temp
 		tail=temp; // set tail to temp
 	}
 	else
 	{
-		add_node();
+		add_node();	//add this new node
 		tail->next = temp;
 		tail=temp;
 		tail->next= head;
