@@ -15,7 +15,7 @@ typedef struct{
     //Thread ID
     short tid;
     //Pointer to thread node 
-    // struct inside struct seems bad so we took it out
+    // struct we took it out
     //struct threadNode * mynode;
     ucontext_t *ucp;//context pointer
 

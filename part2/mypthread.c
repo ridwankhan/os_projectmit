@@ -168,9 +168,9 @@ void add_to_queue(mypthread_t* threadname){
 	else
 	{
 		add_node();	//add this new node
-		tail->next = temp;
-		tail=temp;
-		tail->next= head;
+		tail->next = temp;//set the next node to tail to temp node
+		tail=temp;//make themp node to tail
+		tail->next= head; //set next of tail to head to make it a circle
 	}
 	temp->ptr= threadname;
 }
