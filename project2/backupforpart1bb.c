@@ -14,61 +14,23 @@
 #define SIGMIN SIGRTMIN+2
 #define SIGSUM SIGRTMIN+3
 #define SIGNOINFO SIGRTMIN
-#define SIGNALTOKILLCHILD SIGRTMIN +4
 //int noinfotosend =0;
 int childloop=6;
 void siguserhandler(int signum, siginfo_t *info,void *ptr ){
     printf("In siguserhandler\n");
     printf("Signal origninates from process %lu\n",(unsigned long) info->si_pid );
     printf("I am %d killing %d\n",getpid(), info->si_pid);
-
-    pid_t childtokill = info->si_pid;
-
-    union sigval infotopass;
-
-    if(getpid() == child[0]){
-        for(int i =2; i<4; i++)
-        {
-            infotopass.sival_int = childtokill;
-            sigqueue(child[i],SIGNALTOKILLCHILD,infotopass);
-
-        }
-        kill(child[2],SIGUSR2);
-        kill(child[3],SIGUSR2);
-    }
-
-    if(getpid() == child[1]){
-        kill(child[4],SIGUSR2);
-        kill(child[5],SIGUSR2);
-    }
-    /*
-
     if (kill(info->si_pid,SIGTERM) ==0)
     {
         printf("kill succesful again\n");
     }
-    */
-
     //childloop=childloop-3;
     union sigval child2novalue;
     //kill(getpid(), SIGNOINFO);
     //child2novalue.sival_int = -2147483647;
     //sigqueue(getpid(), SIGNOINFO,child2novalue);
 }
-void siguser2handler(int signum,siginfo_t *info, void *ptr)
-{
-        siginfo_t info;
-        sigset_t maskmax;
-        sigemptyset(&maskmax);
-        sigaddset(&maskmax,SIGNALTOKILLCHILD);
 
-        sigprocmask(SIG_BLOCK,&maskmax0,NULL);
-
-        sigwaitinfo(&maskmax,&info);
-
-        kill(info.si_value.sival_int,SIGTERM);
-
-}
 void handler(int signum, siginfo_t *info, void *ptr) {
     printf("In handler\n");   
     printf("pid: %d,parentpid: %d\n",getpid(), getppid() );
@@ -763,13 +725,6 @@ int main(){
 
     sigaction(SIGUSR1, &act1, NULL);
 
-    struct sigaction act2;
-    memset(&act2, 0, sizeof(act2));
-
-    act2.sa_sigaction = siguser2handler;
-    act2.sa_flags = SA_SIGINFO;
-
-    sigaction(SIGUSR2, &act2, NULL);
 
 
 FILE* nums = fopen("numbers.txt", "r");
