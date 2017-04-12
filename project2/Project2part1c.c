@@ -91,7 +91,7 @@ int partd(int array[],int index1, int index2)
     int mind;
     int sumd;
 
-    printf("parent pid is %d\n",getpid());
+   printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
     // spawning the children
        pid=fork();
         if (pid==0)
@@ -141,7 +141,7 @@ int partd(int array[],int index1, int index2)
      if (getpid()==child[0])
     { 
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        printf("child 0\n");
+        //printf("child 0\n");
         maxd = max(array,beginning,gap);
         mind = min(array,beginning,gap);
         sumd = sum(array,beginning,gap);
@@ -245,7 +245,7 @@ int partd(int array[],int index1, int index2)
     else if(getpid()==child[1])
     {
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        printf("child 1\n");
+        //printf("child 1\n");
         maxd = max(array,gap+1,2*gap);
         mind = min(array,gap+1,2*gap);
         sumd = sum(array,gap+1,2*gap);
@@ -344,7 +344,7 @@ int partd(int array[],int index1, int index2)
     else if (getpid()==child[2])
     {
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        printf("child 2\n");
+        //printf("child 2\n");
 
         maxd = max(array,2*gap+1, 3*gap);
         mind = min(array,2*gap+1, 3*gap);
@@ -361,7 +361,7 @@ int partd(int array[],int index1, int index2)
         }
         else
         {
-            printf("success in child 2 max \n");
+            //printf("success in child 2 max \n");
         }
         //sending min signal 
         union sigval child2min;
@@ -372,19 +372,19 @@ int partd(int array[],int index1, int index2)
             printf("fail in child 2 min \n");
         }
         else{
-            printf("success in child 2 min\n");
+            //printf("success in child 2 min\n");
         }
 
         union sigval child2sum;
         child2sum.sival_int= sumd;
 
-        printf("child2sum is %d \n", sumd);
+        //printf("child2sum is %d \n", sumd);
         if(sigqueue(getppid(),SIGSUM,child2sum) == -1)
         {
             printf("fail in child 2 sum \n");
         }
         else{
-            printf("success in child 2 sum\n");
+            //printf("success in child 2 sum\n");
         }
 
         exit(0);
@@ -393,7 +393,7 @@ int partd(int array[],int index1, int index2)
     else if (getpid()==child[3])
     {
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        printf("child 3\n");
+        //printf("child 3\n");
         maxd = max(array,3*gap+1,4*gap);
         mind = min(array,3*gap+1,4*gap);
         sumd = sum(array,3*gap+1,4*gap);
@@ -407,7 +407,7 @@ int partd(int array[],int index1, int index2)
             printf("fail in child 3 max \n");
         }
         else{
-            printf("success in child 3 min \n");
+            //printf("success in child 3 min \n");
         }
 
         //sending min signal
@@ -415,14 +415,14 @@ int partd(int array[],int index1, int index2)
         union sigval child3min;
         child3min.sival_int= mind;
 
-        printf("child3sum is %d \n", sumd);
+        //printf("child3sum is %d \n", sumd);
         if(sigqueue(getppid(),SIGMIN,child3min) == -1)
         {
             printf("fail in child 3 min \n");
         }
 
         else{
-            printf("success in child 3 min \n");
+            //printf("success in child 3 min \n");
         }
 
         //sending sum signal
@@ -436,7 +436,7 @@ int partd(int array[],int index1, int index2)
         }
 
         else{
-            printf("success in child 3 sum \n");
+            //printf("success in child 3 sum \n");
         }
         exit(0);
     }
@@ -444,7 +444,7 @@ int partd(int array[],int index1, int index2)
     else if (getpid()==child[4])
     {
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        printf("child 4\n");
+        //printf("child 4\n");
         maxd = max(array,4*gap+1,5*gap);
         mind = min(array,4*gap+1,5*gap);
         sumd = sum(array,4*gap+1,5*gap);
@@ -460,7 +460,7 @@ int partd(int array[],int index1, int index2)
         }
         else
         {
-            printf("success in child 4 max \n");
+            //printf("success in child 4 max \n");
         }
 
         //sending min signal 
@@ -474,7 +474,7 @@ int partd(int array[],int index1, int index2)
         }
         else 
         {
-            printf("success in child 4 min \n");
+            //printf("success in child 4 min \n");
         }
         
         union sigval child4sum;
@@ -486,7 +486,7 @@ int partd(int array[],int index1, int index2)
         }
         else 
         {
-            printf("success in child 4 sum \n");
+            //printf("success in child 4 sum \n");
         }
         exit(0);
     }
@@ -495,7 +495,7 @@ int partd(int array[],int index1, int index2)
     {
 
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        printf("child 5\n");
+        //printf("child 5\n");
         maxd = max(array,5*gap+1,end);
         mind = min(array,5*gap+1,end);
         sumd = sum(array,5*gap+1,end);
@@ -511,7 +511,7 @@ int partd(int array[],int index1, int index2)
         
         else
         {
-            printf("success in child 5 max \n");
+            //printf("success in child 5 max \n");
         }
         //sending min signal 
 
@@ -524,7 +524,7 @@ int partd(int array[],int index1, int index2)
         }
         else
         {
-            printf("success in child 5 min \n");
+            //printf("success in child 5 min \n");
         }
 
         union sigval child5sum;
@@ -536,7 +536,7 @@ int partd(int array[],int index1, int index2)
         }
         else
         {
-            printf("success in child 5 sum \n");
+            //printf("success in child 5 sum \n");
         }
         exit(0);
     }
@@ -602,9 +602,9 @@ int partd(int array[],int index1, int index2)
             }
 
             sleep(10); //opportunity to press CTRL Csleep(10); // opportunity to press ctrl c
-            printf("Actual max value is %d \n",actualmax);
-            printf("Actual min value is %d \n",actualmin);
-            printf("Actual sum value is %d \n",actualsum);
+            printf("Max is %d \n",actualmax);
+            printf("Min is %d \n",actualmin);
+            printf("Sum is %d \n",actualsum);
 
     	wait(NULL);
     	wait(NULL);
