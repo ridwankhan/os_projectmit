@@ -393,7 +393,7 @@ int partd(int array[],int index1, int index2)
     else if (getpid()==child[3])
     {
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        //printf("child 3\n");
+        printf("child 3\n");
         maxd = max(array,3*gap+1,4*gap);
         mind = min(array,3*gap+1,4*gap);
         sumd = sum(array,3*gap+1,4*gap);
