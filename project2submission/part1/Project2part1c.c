@@ -141,7 +141,7 @@ int partd(int array[],int index1, int index2)
      if (getpid()==child[0])
     { 
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        //printf("child 0\n");
+        printf("child 0\n");
         maxd = max(array,beginning,gap);
         mind = min(array,beginning,gap);
         sumd = sum(array,beginning,gap);
@@ -245,7 +245,7 @@ int partd(int array[],int index1, int index2)
     else if(getpid()==child[1])
     {
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        //printf("child 1\n");
+        printf("child 1\n");
         maxd = max(array,gap+1,2*gap);
         mind = min(array,gap+1,2*gap);
         sumd = sum(array,gap+1,2*gap);
@@ -344,7 +344,7 @@ int partd(int array[],int index1, int index2)
     else if (getpid()==child[2])
     {
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        //printf("child 2\n");
+        printf("child 2\n");
 
         maxd = max(array,2*gap+1, 3*gap);
         mind = min(array,2*gap+1, 3*gap);
@@ -444,7 +444,7 @@ int partd(int array[],int index1, int index2)
     else if (getpid()==child[4])
     {
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        //printf("child 4\n");
+        printf("child 4\n");
         maxd = max(array,4*gap+1,5*gap);
         mind = min(array,4*gap+1,5*gap);
         sumd = sum(array,4*gap+1,5*gap);
@@ -495,7 +495,7 @@ int partd(int array[],int index1, int index2)
     {
 
         printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
-        //printf("child 5\n");
+        printf("child 5\n");
         maxd = max(array,5*gap+1,end);
         mind = min(array,5*gap+1,end);
         sumd = sum(array,5*gap+1,end);
