@@ -91,7 +91,7 @@ int partd(int array[],int index1, int index2)
     int mind;
     int sumd;
 
-   printf("\nHi I'm process %d and my parent is %d\n",getpid(),getppid());
+   printf("\nHi I'm Parent process %d and my parent is %d\n",getpid(),getppid());
     // spawning the children
        pid=fork();
         if (pid==0)
